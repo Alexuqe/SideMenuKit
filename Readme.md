@@ -31,7 +31,7 @@ import SideMenuKit
 ```
 
 ## Структура проекта
-
+```swift
 SideMenuKit/
 ├── Package.swift                # Конфигурация Swift Package
 └── Sources/
@@ -40,7 +40,7 @@ SideMenuKit/
         ├── SideMenuViewController.swift   # UI-компонент бокового меню
         ├── SideMenuManager.swift  # Менеджер для отображения/скрытия меню
         └── SideMenuRouter.swift   # Централизованная навигация между экранами
-
+```
 
 ## Использование
 
