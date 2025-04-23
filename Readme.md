@@ -67,7 +67,14 @@ let sideMenuVC = SideMenuViewController(menuWidth: 300, cellType: UITableViewCel
 ### 3. SideMenuManager
 Класс SideMenuManager отвечает за анимированное появление и скрытие меню:
 ```swift
-let menuManager = SideMenuManager(container: self, menuWidth: 300, menuItems: menuItems)
+ let menuManager = SideMenuManager(
+            container: self,
+            navigationVC: navigationVC,
+            blurEffectView: blurEffectView,
+            menuWidth: 300,
+            menuItems: menuItems
+        )
+        
 menuManager.showMenu()
 
 Чтобы скрыть меню, вызовите:
@@ -94,51 +101,84 @@ router.navigate(to: 0)  // Переход на экран по индексу 0 
 import UIKit
 import SideMenuKit
 
+/// Контейнерный контроллер, в котором интегрируется боковое меню и осуществляется навигация между экранами.
 final class ContainerViewController: UIViewController {
 
-    // Массив данных для меню
+    // Массив данных меню.
     private let menuItems: [SideMenuItem] = [
         SideMenuItem(title: "Главная", image: UIImage(named: "home_icon")),
         SideMenuItem(title: "Профиль", image: UIImage(named: "profile_icon")),
         SideMenuItem(title: "Настройки", image: UIImage(named: "settings_icon")),
         SideMenuItem(title: "Выход", image: UIImage(named: "logout_icon"))
     ]
-
-    // Менеджер бокового меню
-    private var menuManager: SideMenuManager!
-
-    // Роутер для навигации между экранами
-    private var menuRouter: SideMenuRouterProtocol!
-
-    // Массив контроллеров для навигации
+    
+    // Массив контроллеров для навигации.
     private var viewControllers: [UIViewController] = [
         HomeViewController(),
-        ProfileViewController(),
-        SettingsViewController(),
-        LogoutViewController()
+        InfoViewController(),
+        RatingViewController()
     ]
-
+    
+    // Менеджер бокового меню с расширенной анимацией.
+    private var menuManager: SideMenuManager!
+    
+    // Роутер для переключения между экранами.
+    private var menuRouter: SideMenuRouterProtocol!
+    
+    // Свойства, необходимые для расширенной анимации.
+    // Предполагается, что контейнер обернут в UINavigationController.
+    private var navigationVC: UINavigationController? {
+        return self.navigationController
+    }
+    
+    // Blur Effect View для эффекта размытия фона.
+    private lazy var blurEffectView: UIVisualEffectView = {
+        let blurEffect = UIBlurEffect(style: .light)
+        let view = UIVisualEffectView(effect: blurEffect)
+        view.frame = self.view.bounds
+        view.alpha = 0.0
+        return view
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Настройка бокового меню
-        menuManager = SideMenuManager(container: self, menuWidth: 300, menuItems: menuItems)
-
-        // Настройка роутера для переключения экранов
+        view.backgroundColor = .gray
+        
+        // Добавляем blurEffectView в иерархию и отправляем его назад.
+        view.addSubview(blurEffectView)
+        view.sendSubviewToBack(blurEffectView)
+        
+        // Инициализируем менеджер бокового меню с расширенной анимацией.
+        menuManager = SideMenuManager(
+            container: self,
+            navigationVC: navigationVC,
+            blurEffectView: blurEffectView,
+            menuWidth: 300,
+            menuItems: menuItems
+        )
+        
+        // Инициализируем роутер, который осуществляет навигацию между контроллерами.
         menuRouter = SideMenuRouter(container: self, controllers: viewControllers)
+        
+        // Настраиваем кнопку вызова меню в navigation bar.
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "list.dash"),
+            style: .done,
+            target: self,
+            action: #selector(didTapMenuButton)
+        )
     }
-
-    // Пример метода для вызова меню (например, привязанный к кнопке)
+    
+    /// Вызывает показ бокового меню с обновленной анимацией.
     @objc private func didTapMenuButton() {
         menuManager.showMenu()
     }
 }
 
 extension ContainerViewController: SideMenuDelegate {
+    /// Реализация делегата меню: при выборе пункта скрываем меню и переключаем экран.
     func didSelect(index: Int) {
-        // Скрываем меню перед навигацией
         menuManager.hideMenu()
-        // Переходим к выбранному экрану
         menuRouter.navigate(to: index)
     }
 }
