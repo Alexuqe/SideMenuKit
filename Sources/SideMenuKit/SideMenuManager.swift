@@ -13,6 +13,16 @@ public final class SideMenuManager {
 
     /// Ширина бокового меню.
     private let menuWidth: CGFloat
+
+    /// Цвет бокового меню.
+    private let menuColor: UIColor
+
+    /// Цвет выбранной ячейки меню.
+    private let selectedItemColor: UIColor
+
+    /// Цвет ячейки меню.
+    private let cellColor: UIColor
+
     /// Дополнительный вертикальный сдвиг для анимации (например, 15% высоты экрана).
     private let menuHeight: CGFloat = UIScreen.main.bounds.height * 0.15
 
@@ -34,12 +44,25 @@ public final class SideMenuManager {
                 navigationVC: UINavigationController?,
                 blurEffectView: UIVisualEffectView?,
                 menuWidth: CGFloat = UIScreen.main.bounds.width * 0.4,
+                menuColor: UIColor,
+                selectedItemColor: UIColor? = nil,
+                cellColor: UIColor = .white,
                 menuItems: [SideMenuItem]) {
         self.container = container
-        self.sideMenuVC = SideMenuViewController(menuWidth: menuWidth, menuItems: menuItems)
+
+        self.sideMenuVC = SideMenuViewController(
+            menuWidth: menuWidth,
+            menuColor: menuColor,
+            selectedItemColor: selectedItemColor ?? .white,
+            cellColor: cellColor,
+            menuItems: menuItems
+        )
         self.menuWidth = menuWidth
         self.navigationVC = navigationVC
         self.blurEffectView = blurEffectView
+        self.menuColor = menuColor
+        self.selectedItemColor = selectedItemColor ?? .white
+        self.cellColor = cellColor
     }
 
     /// Показывает боковое меню с комбинированной анимацией, включающей масштабирование и перенос навигационного экрана, а также изменение прозрачности blur‑view.

@@ -15,6 +15,15 @@ public final class SideMenuViewController: UIViewController {
 
     /// Ширина меню.
     private let menuWidth: CGFloat
+
+    /// Цвет меню.
+    private let menuColor: UIColor
+
+    /// Цвет ячейки.
+    private let cellColor: UIColor?
+
+    /// Цвет выбранной ячейки.
+    private let selectedItemColor: UIColor?
     /// Тип ячейки для использования в таблице. По умолчанию используется UITableViewCell.
     private let cellType: UITableViewCell.Type
     /// Массив объектов типа `SideMenuItem` для заполнения таблицы.
@@ -37,12 +46,18 @@ public final class SideMenuViewController: UIViewController {
     ///   - menuItems: Массив объектов `SideMenuItem`, описывающих пункты меню.
     public init(
         menuWidth: CGFloat = UIScreen.main.bounds.width * 0.4,
+        menuColor: UIColor,
+        selectedItemColor: UIColor,
+        cellColor: UIColor,
         cellType: UITableViewCell.Type = UITableViewCell.self,
         menuItems: [SideMenuItem]
     ) {
         self.menuWidth = menuWidth
         self.cellType = cellType
         self.menuItems = menuItems
+        self.menuColor = menuColor
+        self.cellColor = cellColor
+        self.selectedItemColor = selectedItemColor
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -60,7 +75,7 @@ public final class SideMenuViewController: UIViewController {
 
     /// Настройка базовых параметров интерфейса.
     private func setupUI() {
-        view.backgroundColor = .darkGray
+        view.backgroundColor = menuColor
         view.addSubview(tableView)
 
         NSLayoutConstraint.activate([
@@ -103,5 +118,9 @@ extension SideMenuViewController: UITableViewDataSource, UITableViewDelegate {
         let item = menuItems[indexPath.row]
         cell.textLabel?.text = item.title
         cell.imageView?.image = item.image
+
+        let view = UIView()
+        view.backgroundColor = selectedItemColor?.withAlphaComponent(0.4)
+        cell.backgroundView = view
     }
 }
