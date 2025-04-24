@@ -3,7 +3,7 @@ import UIKit
 /// Протокол делегата для отслеживания выбора пункта меню.
 public protocol SideMenuDelegate: AnyObject {
     /// Вызывается при выборе пункта меню.
-    /// - Parameter index: Индекс выбранного пункта.
+    /// - Parameter index: Индекс выбранного пункта в массиве.
     func didSelect(index: Int)
 }
 
@@ -15,7 +15,8 @@ public final class SideMenuViewController: UIViewController {
 
     /// Ширина меню.
     private let menuWidth: CGFloat
-    /// Пользовательский тип ячейки, который регистрируется.
+    /// Тип ячейки для отображения пунктов меню.
+    /// Если используется стандартный UITableViewCell, то настройка содержимого будет выполнена через contentConfiguration.
     private let cellType: UITableViewCell.Type
     /// Массив объектов типа SideMenuItem для заполнения таблицы.
     private let menuItems: [SideMenuItem]
@@ -27,7 +28,7 @@ public final class SideMenuViewController: UIViewController {
     private let textColor: UIColor
     /// Цвет фона таблицы.
     private let tableViewColor: UIColor
-    /// TintColor для изображений в ячейках.
+    /// TintColor для изображений (иконок) в стандартных ячейках.
     private let iconTintColor: UIColor
 
     /// Таблица для отображения пунктов меню.
@@ -36,7 +37,7 @@ public final class SideMenuViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.backgroundColor = tableViewColor // задаём цвет фона таблицы
+        tableView.backgroundColor = tableViewColor
         return tableView
     }()
 
@@ -44,10 +45,10 @@ public final class SideMenuViewController: UIViewController {
     ///
     /// - Parameters:
     ///   - menuWidth: Ширина меню (по умолчанию 40% ширины экрана).
-    ///   - cellType: Тип ячейки, используемый в таблице. Если использовать стандартную (UITableViewCell), контент настраивается через contentConfiguration.
+    ///   - cellType: Тип ячейки, используемый в таблице. По умолчанию UITableViewCell.
     ///   - menuItems: Массив объектов SideMenuItem, описывающих пункты меню.
     ///   - backgroundColor: Цвет фона бокового меню.
-    ///   - textColor: Цвет текста в стандартных ячейках.
+    ///   - textColor: Цвет шрифта в стандартных ячейках.
     ///   - tableViewColor: Цвет фона таблицы.
     ///   - iconTintColor: Цвет изображений (иконок) в стандартных ячейках.
     public init(
@@ -74,18 +75,16 @@ public final class SideMenuViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: Жизненный цикл
-
+    /// Настраивает интерфейс после загрузки представления.
     public override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         registerCells()
     }
 
-    // MARK: Настройка UI
-
+    /// Настройка базовых параметров интерфейса.
     private func setupUI() {
-        view.backgroundColor = backgroundColor // задаём цвет бокового меню
+        view.backgroundColor = backgroundColor
         view.addSubview(tableView)
 
         NSLayoutConstraint.activate([
@@ -96,12 +95,10 @@ public final class SideMenuViewController: UIViewController {
         ])
     }
 
-    /// Регистрирует тип ячейки для таблицы.
+    /// Регистрация ячеек для таблицы.
     private func registerCells() {
         tableView.register(cellType, forCellReuseIdentifier: String(describing: cellType))
     }
-
-    // MARK: Приватная настройка стандартной ячейки
 
     /// Настраивает содержимое стандартной ячейки (UITableViewCell) через UIListContentConfiguration.
     ///
@@ -111,29 +108,26 @@ public final class SideMenuViewController: UIViewController {
     /// - Returns: UIListContentConfiguration, настроенный для отображения пункта меню.
     private func contentConfiguration(cell: UITableViewCell, item: SideMenuItem) -> UIListContentConfiguration {
         var content = cell.defaultContentConfiguration()
-        // Если у пункта меню есть изображение, используем его; можно также использовать systemName если требуется
+        // Если у объекта есть изображение, используем его.
         content.image = item.image
         content.imageProperties.preferredSymbolConfiguration = .init(pointSize: 20)
         content.imageToTextPadding = 8
-        content.imageProperties.tintColor = .white
-
+        content.imageProperties.tintColor = iconTintColor
         content.attributedText = NSAttributedString(
             string: item.title,
             attributes: [
                 .font: UIFont.systemFont(ofSize: 20, weight: .regular),
-                .foregroundColor: UIColor.white
-            ])
+                .foregroundColor: textColor
+            ]
+        )
         return content
     }
 
     /// Конфигурирует ячейку.
     private func configureCell(_ cell: UITableViewCell, indexPath: IndexPath) {
         let item = menuItems[indexPath.row]
-        // Если используется стандартная ячейка, настраиваем её через contentConfiguration;
-        // иначе оставляем настройку на усмотрение разработчика.
         if cellType == UITableViewCell.self {
             cell.contentConfiguration = contentConfiguration(cell: cell, item: item)
-
             cell.backgroundColor = .clear
             cell.layer.cornerRadius = 20
             cell.clipsToBounds = true
@@ -142,7 +136,7 @@ public final class SideMenuViewController: UIViewController {
             bgView.backgroundColor = UIColor.white.withAlphaComponent(0.4)
             cell.selectedBackgroundView = bgView
         } else {
-            // Для кастомных ячеек настройка должна осуществляться в их реализации.
+            // Для кастомных ячеек настройка должна осуществляться внутри самой ячейки.
         }
     }
 }

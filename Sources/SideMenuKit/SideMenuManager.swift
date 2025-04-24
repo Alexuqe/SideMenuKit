@@ -29,12 +29,12 @@ public final class SideMenuManager {
     ///   - navigationVC: Навигационный контроллер, который будет анимироваться.
     ///   - blurEffectView: Blur effect view, на который накладывается эффект при открытии меню.
     ///   - menuWidth: Ширина бокового меню, по умолчанию 40% от ширины экрана.
-    ///   - menuItems: Массив данных типа SideMenuItem для пункта меню.
+    ///   - menuItems: Массив данных типа `SideMenuItem` для заполнения меню.
     ///   - backgroundColor: Цвет фона бокового меню.
-    ///   - textColor: Цвет текста в ячейке.
+    ///   - textColor: Цвет текста в стандартных ячейках.
     ///   - tableViewColor: Цвет фона таблицы.
-    ///   - iconTintColor: Цвет изображений (иконок).
-    ///   - cellType: Тип ячейки для таблицы; пользователь может передать свою кастомную ячейку.
+    ///   - iconTintColor: Цвет изображений (иконок) в стандартных ячейках.
+    ///   - cellType: Тип ячейки, используемый в таблице; пользователь может передать свою кастомную ячейку.
     public init(container: UIViewController,
                 navigationVC: UINavigationController?,
                 blurEffectView: UIVisualEffectView?,
@@ -89,7 +89,6 @@ public final class SideMenuManager {
                        usingSpringWithDamping: 0.8,
                        initialSpringVelocity: 0) { [weak self] in
             guard let self = self else { return }
-
             self.container?.view.layoutIfNeeded()
             // Применяем скругление углов.
             self.navigationVC?.view.layer.cornerRadius = 12
@@ -113,7 +112,6 @@ public final class SideMenuManager {
                        usingSpringWithDamping: 0.8,
                        initialSpringVelocity: 0) { [weak self] in
             guard let self = self else { return }
-
             self.container?.view.layoutIfNeeded()
             self.navigationVC?.view.layer.cornerRadius = 0
             self.navigationVC?.view.transform = .identity
