@@ -13,16 +13,6 @@ public final class SideMenuManager {
 
     /// Ширина бокового меню.
     private let menuWidth: CGFloat
-
-    /// Цвет бокового меню.
-    private let menuColor: UIColor
-
-    /// Цвет выбранной ячейки меню.
-    private let selectedItemColor: UIColor
-
-    /// Цвет ячейки меню.
-    private let cellColor: UIColor
-
     /// Дополнительный вертикальный сдвиг для анимации (например, 15% высоты экрана).
     private let menuHeight: CGFloat = UIScreen.main.bounds.height * 0.15
 
@@ -39,30 +29,35 @@ public final class SideMenuManager {
     ///   - navigationVC: Навигационный контроллер, который будет анимироваться.
     ///   - blurEffectView: Blur effect view, на который накладывается эффект при открытии меню.
     ///   - menuWidth: Ширина бокового меню, по умолчанию 40% от ширины экрана.
-    ///   - menuItems: Массив данных типа `SideMenuItem` для пункта меню.
+    ///   - menuItems: Массив данных типа SideMenuItem для пункта меню.
+    ///   - backgroundColor: Цвет фона бокового меню.
+    ///   - textColor: Цвет текста в ячейке.
+    ///   - tableViewColor: Цвет фона таблицы.
+    ///   - iconTintColor: Цвет изображений (иконок).
+    ///   - cellType: Тип ячейки для таблицы; пользователь может передать свою кастомную ячейку.
     public init(container: UIViewController,
                 navigationVC: UINavigationController?,
                 blurEffectView: UIVisualEffectView?,
                 menuWidth: CGFloat = UIScreen.main.bounds.width * 0.4,
-                menuColor: UIColor,
-                selectedItemColor: UIColor? = nil,
-                cellColor: UIColor = .white,
-                menuItems: [SideMenuItem]) {
+                menuItems: [SideMenuItem],
+                backgroundColor: UIColor = .darkGray,
+                textColor: UIColor = .white,
+                tableViewColor: UIColor = .clear,
+                iconTintColor: UIColor = .white,
+                cellType: UITableViewCell.Type = UITableViewCell.self) {
         self.container = container
-
-        self.sideMenuVC = SideMenuViewController(
-            menuWidth: menuWidth,
-            menuColor: menuColor,
-            selectedItemColor: selectedItemColor ?? .white,
-            cellColor: cellColor,
-            menuItems: menuItems
-        )
         self.menuWidth = menuWidth
         self.navigationVC = navigationVC
         self.blurEffectView = blurEffectView
-        self.menuColor = menuColor
-        self.selectedItemColor = selectedItemColor ?? .white
-        self.cellColor = cellColor
+        self.sideMenuVC = SideMenuViewController(
+            menuWidth: menuWidth,
+            cellType: cellType,
+            menuItems: menuItems,
+            backgroundColor: backgroundColor,
+            textColor: textColor,
+            tableViewColor: tableViewColor,
+            iconTintColor: iconTintColor
+        )
     }
 
     /// Показывает боковое меню с комбинированной анимацией, включающей масштабирование и перенос навигационного экрана, а также изменение прозрачности blur‑view.
@@ -95,7 +90,6 @@ public final class SideMenuManager {
                        initialSpringVelocity: 0) { [weak self] in
             guard let self = self else { return }
 
-            // Обновляем раскладку представлений.
             self.container?.view.layoutIfNeeded()
             // Применяем скругление углов.
             self.navigationVC?.view.layer.cornerRadius = 12
@@ -122,7 +116,6 @@ public final class SideMenuManager {
 
             self.container?.view.layoutIfNeeded()
             self.navigationVC?.view.layer.cornerRadius = 0
-            // Возвращаем идентичное преобразование.
             self.navigationVC?.view.transform = .identity
             self.blurEffectView?.alpha = 0.0
         } completion: { [weak self] _ in

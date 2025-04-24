@@ -7,18 +7,14 @@ public struct SideMenuItem {
     public let title: String
         /// Изображение пункта меню (опционально).
     public let image: UIImage?
-        /// Подзаголовок пункта меню.
-    public let subtitle: String?
-
+    
         /// Инициализатор для создания пункта меню.
         ///
         /// - Parameters:
         ///   - title: Заголовок пункта меню.
         ///   - image: Изображение для пункта меню (по умолчанию `nil`).
-        ///   - subtitle: Подзаголовок пункта меню
-    public init(title: String, image: UIImage? = nil, subtitle: String) {
+    public init(title: String, image: UIImage? = nil) {
         self.title = title
         self.image = image
-        self.subtitle = subtitle
     }
 }
