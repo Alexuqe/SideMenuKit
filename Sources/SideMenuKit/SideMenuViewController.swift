@@ -16,7 +16,7 @@ public final class SideMenuViewController: UIViewController {
     /// Ширина меню.
     private let menuWidth: CGFloat
     /// Тип ячейки для отображения пунктов меню.
-    /// Если используется стандартный UITableViewCell, то настройка содержимого будет выполнена через contentConfiguration.
+    /// Если используется стандартный UITableViewCell, то настройка содержимого производится через contentConfiguration.
     private let cellType: UITableViewCell.Type
     /// Массив объектов типа SideMenuItem для заполнения таблицы.
     private let menuItems: [SideMenuItem]
@@ -80,6 +80,7 @@ public final class SideMenuViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         registerCells()
+        tableView.reloadData()  // Добавлено для гарантированного обновления контента
     }
 
     /// Настройка базовых параметров интерфейса.
@@ -107,27 +108,37 @@ public final class SideMenuViewController: UIViewController {
     ///   - item: Объект типа SideMenuItem, содержащий данные для ячейки.
     /// - Returns: UIListContentConfiguration, настроенный для отображения пункта меню.
     private func contentConfiguration(cell: UITableViewCell, item: SideMenuItem) -> UIListContentConfiguration {
-        var content = cell.defaultContentConfiguration()
-        // Если у объекта есть изображение, используем его.
-        content.image = item.image
-        content.imageProperties.preferredSymbolConfiguration = .init(pointSize: 20)
-        content.imageToTextPadding = 8
-        content.imageProperties.tintColor = iconTintColor
-        content.attributedText = NSAttributedString(
-            string: item.title,
-            attributes: [
-                .font: UIFont.systemFont(ofSize: 20, weight: .regular),
-                .foregroundColor: textColor
-            ]
-        )
-        return content
+        if #available(iOS 14.0, *) {
+            var content = cell.defaultContentConfiguration()
+            content.image = item.image
+            content.imageProperties.preferredSymbolConfiguration = .init(pointSize: 20)
+            content.imageToTextPadding = 8
+            content.imageProperties.tintColor = iconTintColor
+            content.attributedText = NSAttributedString(
+                string: item.title,
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 20, weight: .regular),
+                    .foregroundColor: textColor
+                ]
+            )
+            return content
+        } else {
+            // Для iOS 13 можно напрямую настроить textLabel и imageView.
+            cell.textLabel?.text = item.title
+            cell.textLabel?.textColor = textColor
+            cell.imageView?.image = item.image?.withRenderingMode(.alwaysTemplate)
+            cell.imageView?.tintColor = iconTintColor
+            return UIListContentConfiguration.cell()  // возвращаем пустую конфигурацию
+        }
     }
 
     /// Конфигурирует ячейку.
     private func configureCell(_ cell: UITableViewCell, indexPath: IndexPath) {
         let item = menuItems[indexPath.row]
+        // Если используется стандартная ячейка, настраиваем её через contentConfiguration.
         if cellType == UITableViewCell.self {
             cell.contentConfiguration = contentConfiguration(cell: cell, item: item)
+
             cell.backgroundColor = .clear
             cell.layer.cornerRadius = 20
             cell.clipsToBounds = true
@@ -136,7 +147,7 @@ public final class SideMenuViewController: UIViewController {
             bgView.backgroundColor = UIColor.white.withAlphaComponent(0.4)
             cell.selectedBackgroundView = bgView
         } else {
-            // Для кастомных ячеек настройка должна осуществляться внутри самой ячейки.
+            // Для кастомных ячеек настройку осуществляет пользовательская реализация.
         }
     }
 }

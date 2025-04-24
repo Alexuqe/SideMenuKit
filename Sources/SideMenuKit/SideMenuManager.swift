@@ -29,7 +29,7 @@ public final class SideMenuManager {
     ///   - navigationVC: Навигационный контроллер, который будет анимироваться.
     ///   - blurEffectView: Blur effect view, на который накладывается эффект при открытии меню.
     ///   - menuWidth: Ширина бокового меню, по умолчанию 40% от ширины экрана.
-    ///   - menuItems: Массив данных типа `SideMenuItem` для заполнения меню.
+    ///   - menuItems: Массив данных типа SideMenuItem для заполнения меню.
     ///   - backgroundColor: Цвет фона бокового меню.
     ///   - textColor: Цвет текста в стандартных ячейках.
     ///   - tableViewColor: Цвет фона таблицы.
