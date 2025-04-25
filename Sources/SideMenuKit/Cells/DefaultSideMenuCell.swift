@@ -1,19 +1,51 @@
 import UIKit
 
-final class DefaultSideMenuCell: UITableViewCell, SideMenuCellProtocol {
-    static var reuseIdentifier: String { "DefaultSideMenuCell" }
-
-    func configure(with item: any SideMenuItem) {
-        var config = defaultContentConfiguration()
-        config.text = item.title
-        config.image = item.icon?.withRenderingMode(.alwaysTemplate)
-        config.imageProperties.tintColor = .label
-        config.textProperties.color = .label
-        config.textProperties.font = .preferredFont(forTextStyle: .body)
-        contentConfiguration = config
-
+open class DefaultSideMenuCell: UITableViewCell, SideMenuCellProtocol {
+        // MARK: - UI Components
+    private let iconImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+        // MARK: - Initialization
+    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupLayout()
+    }
+    
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+        // MARK: - Setup
+    private func setupLayout() {
         backgroundColor = .clear
-        selectedBackgroundView = UIView()
-        selectedBackgroundView?.backgroundColor = .systemFill
+        contentView.addSubview(iconImageView)
+        contentView.addSubview(titleLabel)
+        
+        NSLayoutConstraint.activate([
+            iconImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            iconImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: 24),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
+            titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
+        ])
+    }
+    
+        // MARK: - Configuration
+    open func configure(with item: SideMenuItemProtocol) {
+        titleLabel.text = item.title
+        iconImageView.image = item.icon
     }
 }
