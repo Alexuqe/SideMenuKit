@@ -3,21 +3,23 @@ import UIKit
 final class SideMenuViewController: UIViewController {
     private var configuration: SideMenuConfiguration
     private lazy var tableView: UITableView = {
-        let tableView = UITableView()
+        let tableView = UITableView(frame: .zero, style: .plain)
         tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
+        tableView.rowHeight = UITableView.automaticDimension
         return tableView
     }()
 
-    private weak var sideMenuController: SideMenuController?
+    var didSelectItem: ((Int) -> Void)?
 
-    init(configuration: SideMenuConfiguration, sideMenuController: SideMenuController? = nil) {
+    init(configuration: SideMenuConfiguration) {
         self.configuration = configuration
-        self.sideMenuController = sideMenuController
         super.init(nibName: nil, bundle: nil)
     }
 
-    required init?(coder: NSCoder) { fatalError() }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,14 +53,14 @@ extension SideMenuViewController: UITableViewDataSource, UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(
             withIdentifier: configuration.cellType?.reuseIdentifier ?? DefaultSideMenuCell.reuseIdentifier,
             for: indexPath
-        ) as! any SideMenuCellProtocol
+        ) as! SideMenuCellProtocol
 
         cell.configure(with: configuration.items[indexPath.row])
         return cell as UITableViewCell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        sideMenuController?.navigator?.navigateTo(index: indexPath.row)
-        sideMenuController?.hideMenu()
+        tableView.deselectRow(at: indexPath, animated: true)
+        didSelectItem?(indexPath.row)
     }
 }
