@@ -1,18 +1,18 @@
 import UIKit
 
 public struct SideMenuConfiguration {
+    // MARK: - Appearance
     public struct Appearance {
         public let menuWidth: CGFloat
         public let menuBackgroundColor: UIColor
         public let blurEffect: UIBlurEffect?
         public let cornerRadius: CGFloat
 
-        @MainActor
         public init(
-            menuWidth: CGFloat = UIScreen.main.bounds.width * 0.4,
-            menuBackgroundColor: UIColor = .systemBackground,
-            blurEffect: UIBlurEffect? = UIBlurEffect(style: .systemMaterial),
-            cornerRadius: CGFloat = 12.0
+            menuWidth: CGFloat,
+            menuBackgroundColor: UIColor,
+            blurEffect: UIBlurEffect?,
+            cornerRadius: CGFloat
         ) {
             self.menuWidth = menuWidth
             self.menuBackgroundColor = menuBackgroundColor
@@ -21,6 +21,7 @@ public struct SideMenuConfiguration {
         }
     }
 
+    // MARK: - Animation
     public struct Animation {
         public let duration: TimeInterval
         public let dampingRatio: CGFloat
@@ -37,15 +38,15 @@ public struct SideMenuConfiguration {
         }
     }
 
+    // MARK: - Properties
     public let items: [any SideMenuItem]
     public let appearance: Appearance
     public let animation: Animation
     public let cellType: SideMenuCellProtocol.Type?
 
-    @MainActor
     public init(
         items: [any SideMenuItem],
-        appearance: Appearance = Appearance(),
+        appearance: Appearance,
         animation: Animation = Animation(),
         cellType: SideMenuCellProtocol.Type? = nil
     ) {
@@ -53,5 +54,16 @@ public struct SideMenuConfiguration {
         self.appearance = appearance
         self.animation = animation
         self.cellType = cellType
+    }
+}
+
+public extension SideMenuConfiguration.Appearance {
+    static func `default`(menuWidth: CGFloat = UIScreen.main.bounds.width * 0.4) -> Self {
+        .init(
+            menuWidth: menuWidth,
+            menuBackgroundColor: .systemBackground,
+            blurEffect: UIBlurEffect(style: .systemMaterial),
+            cornerRadius: 12.0
+        )
     }
 }

@@ -1,21 +1,16 @@
 import UIKit
 
-@MainActor
-public final class DefaultReplacementNavigator: @preconcurrency SideMenuNavigator {
+public final class DefaultReplacementNavigator: SideMenuNavigator {
     public let viewControllers: [UIViewController]
     private weak var container: UIViewController?
 
-    public init(
-        container: UIViewController,
-        viewControllers: [UIViewController]
-    ) {
+    public init(container: UIViewController, viewControllers: [UIViewController]) {
         self.container = container
         self.viewControllers = viewControllers
     }
 
     public func navigateTo(index: Int) {
-        guard let container = container,
-              index < viewControllers.count else { return }
+        guard let container = container, index < viewControllers.count else { return }
 
         container.children.forEach {
             $0.willMove(toParent: nil)

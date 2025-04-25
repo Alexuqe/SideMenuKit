@@ -27,7 +27,6 @@ public final class SideMenuController: NSObject {
         self.menuViewController = SideMenuViewController(configuration: configuration)
 
         super.init()
-
         setupHierarchy()
         setupGestures()
     }
@@ -37,34 +36,26 @@ public final class SideMenuController: NSObject {
         isMenuOpen ? hideMenu() : showMenu()
     }
 
+    public func updateLayout() {
+        menuViewController.view.frame = CGRect(
+            x: isMenuOpen ? 0 : -configuration.appearance.menuWidth,
+            y: 0,
+            width: configuration.appearance.menuWidth,
+            height: containerView.bounds.height
+        )
+    }
+
+    // Добавленный метод
     public func setDefaultNavigation(viewControllers: [UIViewController]) {
         navigator = DefaultReplacementNavigator(
             container: contentViewController,
             viewControllers: viewControllers
         )
     }
-
-    public func hideMenu() {
-        guard isMenuOpen else { return }
-
-        UIView.animate(
-            withDuration: configuration.animation.duration,
-            delay: 0,
-            usingSpringWithDamping: configuration.animation.dampingRatio,
-            initialSpringVelocity: 0
-        ) { [weak self] in
-            guard let self = self else { return }
-            self.menuViewController.view.frame.origin.x = -self.configuration.appearance.menuWidth
-            self.contentViewController.view.transform = .identity
-            self.blurView?.alpha = 0
-            self.contentViewController.view.layer.cornerRadius = 0
-        }
-        isMenuOpen = false
-    }
 }
 
-// MARK: - Private Setup
-private extension SideMenuController {
+// MARK: - Setup & Animation
+extension SideMenuController {
     func setupHierarchy() {
         menuViewController.view.frame = CGRect(
             x: -configuration.appearance.menuWidth,
@@ -76,30 +67,20 @@ private extension SideMenuController {
         containerView.addSubview(menuViewController.view)
         menuViewController.didMove(toParent: contentViewController)
 
-        setupBlurEffect()
-    }
-
-    func setupBlurEffect() {
-        guard let blurEffect = configuration.appearance.blurEffect else { return }
-
-        blurView = UIVisualEffectView(effect: blurEffect)
-        blurView?.frame = containerView.bounds
-        blurView?.alpha = 0
-        containerView.insertSubview(blurView!, belowSubview: menuViewController.view)
+        if let blurEffect = configuration.appearance.blurEffect {
+            blurView = UIVisualEffectView(effect: blurEffect)
+            blurView?.frame = containerView.bounds
+            blurView?.alpha = 0
+            containerView.insertSubview(blurView!, belowSubview: menuViewController.view)
+        }
     }
 
     func setupGestures() {
-        let tapGesture = UITapGestureRecognizer(
-            target: self,
-            action: #selector(handleTap)
-        )
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.delegate = self
         blurView?.addGestureRecognizer(tapGesture)
 
-        panGestureRecognizer = UIPanGestureRecognizer(
-            target: self,
-            action: #selector(handlePan)
-        )
+        panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         panGestureRecognizer?.delegate = self
         containerView.addGestureRecognizer(panGestureRecognizer!)
     }
@@ -123,6 +104,26 @@ private extension SideMenuController {
             self.contentViewController.view.layer.cornerRadius = self.configuration.appearance.cornerRadius
         }
         isMenuOpen = true
+        delegate?.menuStateChanged(isOpen: true)
+    }
+
+    func hideMenu() {
+        guard isMenuOpen else { return }
+
+        UIView.animate(
+            withDuration: configuration.animation.duration,
+            delay: 0,
+            usingSpringWithDamping: configuration.animation.dampingRatio,
+            initialSpringVelocity: 0
+        ) { [weak self] in
+            guard let self = self else { return }
+            self.menuViewController.view.frame.origin.x = -self.configuration.appearance.menuWidth
+            self.contentViewController.view.transform = .identity
+            self.blurView?.alpha = 0
+            self.contentViewController.view.layer.cornerRadius = 0
+        }
+        isMenuOpen = false
+        delegate?.menuStateChanged(isOpen: false)
     }
 }
 
@@ -137,9 +138,6 @@ extension SideMenuController: UIGestureRecognizerDelegate {
         let velocity = recognizer.velocity(in: containerView)
 
         switch recognizer.state {
-        case .began:
-            break
-
         case .changed:
             let progress = translation.x / configuration.appearance.menuWidth
             let constrainedProgress = min(max(progress, 0), 1)
@@ -149,22 +147,17 @@ extension SideMenuController: UIGestureRecognizerDelegate {
 
             let scale = 1 - (1 - configuration.animation.contentScaleFactor) * constrainedProgress
             contentViewController.view.transform = CGAffineTransform(scaleX: scale, y: scale)
-
             blurView?.alpha = constrainedProgress
 
         case .ended:
             let shouldOpen = velocity.x > 500 || translation.x > configuration.appearance.menuWidth/2
             shouldOpen ? showMenu() : hideMenu()
 
-        default:
-            break
+        default: break
         }
     }
 
-    @objc public func gestureRecognizer(
-        _ gestureRecognizer: UIGestureRecognizer,
-        shouldReceive touch: UITouch
-    ) -> Bool {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         return isMenuOpen || gestureRecognizer == panGestureRecognizer
     }
 }
