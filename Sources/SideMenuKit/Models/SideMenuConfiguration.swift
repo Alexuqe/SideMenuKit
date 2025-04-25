@@ -5,18 +5,27 @@ public struct SideMenuConfiguration {
         public let duration: TimeInterval
         public let dampingRatio: CGFloat
         public let contentScaleFactor: CGFloat
-        public let springVelocity: CGFloat
+        public let menuOffsetX: CGFloat
+        public let menuOffsetY: CGFloat
+        public let cornerRadius: CGFloat
+        public let blurAlpha: CGFloat
 
         public init(
             duration: TimeInterval = 0.4,
             dampingRatio: CGFloat = 0.8,
-            contentScaleFactor: CGFloat = 0.9,
-            springVelocity: CGFloat = 0.0
+            contentScaleFactor: CGFloat = 0.8,
+            menuOffsetX: CGFloat = 30,
+            menuOffsetY: CGFloat = 30,
+            cornerRadius: CGFloat = 40,
+            blurAlpha: CGFloat = 0.9
         ) {
             self.duration = duration
             self.dampingRatio = dampingRatio
             self.contentScaleFactor = contentScaleFactor
-            self.springVelocity = springVelocity
+            self.menuOffsetX = menuOffsetX
+            self.menuOffsetY = menuOffsetY
+            self.cornerRadius = cornerRadius
+            self.blurAlpha = blurAlpha
         }
     }
 
@@ -27,12 +36,12 @@ public struct SideMenuConfiguration {
         public let cornerRadius: CGFloat
 
         public init(
-            menuWidth: CGFloat = UIScreen.main.bounds.width * 0.4,
+            menuWidth: CGFloat? = nil,
             menuBackgroundColor: UIColor = .systemBackground,
             blurEffect: UIBlurEffect? = UIBlurEffect(style: .systemMaterial),
             cornerRadius: CGFloat = 12.0
         ) {
-            self.menuWidth = menuWidth
+            self.menuWidth = menuWidth ?? (UIScreen.main.bounds.width * 0.4)
             self.menuBackgroundColor = menuBackgroundColor
             self.blurEffect = blurEffect
             self.cornerRadius = cornerRadius

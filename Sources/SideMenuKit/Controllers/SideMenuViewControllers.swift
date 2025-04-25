@@ -56,6 +56,11 @@ extension SideMenuViewController: UITableViewDataSource, UITableViewDelegate {
         ) as! SideMenuCellProtocol
 
         cell.configure(with: configuration.items[indexPath.row])
+
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.white.withAlphaComponent(0.4)
+        cell.selectedBackgroundView = backgroundView
+        
         return cell as UITableViewCell
     }
 
