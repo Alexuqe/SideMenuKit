@@ -24,10 +24,7 @@ final class SideMenuAnimator: SideMenuAnimatorProtocol {
             usingSpringWithDamping: configuration.springDamping,
             initialSpringVelocity: configuration.initialSpringVelocity
         ) {
-//            let transform = CGAffineTransform.identity
-//                .translatedBy(x: x, y: y)
-//                .scaledBy(x: scale, y: scale)
-            
+
             view.transform = combined
             view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
             blurView?.alpha = isOpen ? 0.9 : 0
