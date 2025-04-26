@@ -4,14 +4,12 @@ public final class SideMenuKit {
     public static func create(
         items: [SideMenuItemProtocol],
         configuration: SideMenuConfiguration = .init(),
-        cellType: SideMenuCellProtocol.Type = DefaultSideMenuCell.self,
-        navigationController: UINavigationController? = nil
+        cellType: SideMenuCellProtocol.Type = DefaultSideMenuCell.self
     ) -> UIViewController {
         return SideMenuContainerViewController(
             items: items,
             configuration: configuration,
-            cellType: cellType,
-            navigationController: navigationController
+            cellType: cellType
         )
     }
 }
