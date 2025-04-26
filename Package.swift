@@ -1,9 +1,9 @@
-    // swift-tools-version:6.0
+    // swift-tools-version:5.9
     import PackageDescription
 
     let package = Package(
         name: "SideMenuKit",
-        platforms: [.iOS(.v17)],
+        platforms: [.iOS(.v15)],
         products: [
             .library(
                 name: "SideMenuKit",

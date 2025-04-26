@@ -1,64 +1,86 @@
 import UIKit
 
-final class SideMenuViewController: UIViewController {
-    private var configuration: SideMenuConfiguration
-    private lazy var tableView: UITableView = {
-        let tableView = UITableView()
-        tableView.separatorStyle = .none
-        tableView.backgroundColor = .clear
-        return tableView
+open class SideMenuViewController: UIViewController {
+    // MARK: - Properties
+    private let tableView: UITableView = {
+        let table = UITableView()
+        table.translatesAutoresizingMaskIntoConstraints = false
+        table.backgroundColor = .clear
+        table.separatorStyle = .none
+        return table
     }()
 
-    private weak var sideMenuController: SideMenuController?
+    private let items: [SideMenuItemProtocol]
+    private let configuration: SideMenuConfiguration
 
-    init(configuration: SideMenuConfiguration, sideMenuController: SideMenuController? = nil) {
+    public weak var delegate: SideMenuDelegate?
+
+    // MARK: - Initialization
+    public init(
+        items: [SideMenuItemProtocol],
+        configuration: SideMenuConfiguration,
+        cellType: SideMenuCellProtocol.Type
+    ) {
+        self.items = items
         self.configuration = configuration
-        self.sideMenuController = sideMenuController
         super.init(nibName: nil, bundle: nil)
     }
 
-    required init?(coder: NSCoder) { fatalError() }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupTableView()
-        view.backgroundColor = configuration.appearance.menuBackgroundColor
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
-    func updateConfiguration(_ newConfig: SideMenuConfiguration) {
-        configuration = newConfig
-        tableView.reloadData()
+    // MARK: - Lifecycle
+    open override func viewDidLoad() {
+        super.viewDidLoad()
+        setupView()
+        setupTableView()
+    }
+
+    // MARK: - Setup
+    private func setupView() {
+        view.backgroundColor = configuration.backgroundColor ?? .systemBackground
     }
 
     private func setupTableView() {
+        view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
 
-        let cellType = configuration.cellType ?? DefaultSideMenuCell.self
-        tableView.register(cellType, forCellReuseIdentifier: cellType.reuseIdentifier)
+        let cellConfig = configuration.cellConfiguration
 
-        view.addSubview(tableView)
-        tableView.frame = view.bounds
+        tableView.register(
+            cellConfig.cellClass,
+            forCellReuseIdentifier: cellConfig.reuseIdentifier
+        )
+
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 }
 
-extension SideMenuViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        configuration.items.count
+// MARK: - UITableView DataSource & Delegate
+extension SideMenuViewController: UITableViewDelegate, UITableViewDataSource {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return items.count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: configuration.cellType?.reuseIdentifier ?? DefaultSideMenuCell.reuseIdentifier,
-            for: indexPath
-        ) as! any SideMenuCellProtocol
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: configuration.cellConfiguration.reuseIdentifier,
+            for: indexPath) as? SideMenuCellProtocol else
+        { return UITableViewCell() }
 
-        cell.configure(with: configuration.items[indexPath.row])
+        cell.configure(with: items[indexPath.row])
         return cell as UITableViewCell
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        sideMenuController?.navigator?.navigateTo(index: indexPath.row)
-        sideMenuController?.hideMenu()
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        delegate?.sideMenu(self, didSelectItem: items[indexPath.row])
     }
 }

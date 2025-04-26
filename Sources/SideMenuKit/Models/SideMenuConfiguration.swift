@@ -1,57 +1,59 @@
 import UIKit
 
 public struct SideMenuConfiguration {
-    public struct Appearance {
-        public let menuWidth: CGFloat
-        public let menuBackgroundColor: UIColor
-        public let blurEffect: UIBlurEffect?
-        public let cornerRadius: CGFloat
 
-        @MainActor
-        public init(
-            menuWidth: CGFloat = UIScreen.main.bounds.width * 0.4,
-            menuBackgroundColor: UIColor = .systemBackground,
-            blurEffect: UIBlurEffect? = UIBlurEffect(style: .systemMaterial),
-            cornerRadius: CGFloat = 12.0
-        ) {
-            self.menuWidth = menuWidth
-            self.menuBackgroundColor = menuBackgroundColor
-            self.blurEffect = blurEffect
-            self.cornerRadius = cornerRadius
-        }
-    }
+        // MARK: - Default Values
+    private static let defaultMenuWidth: CGFloat = UIScreen.main.bounds.width * 0.4
+    private static let defaultMenuYOffset: CGFloat = UIScreen.main.bounds.height * 0.15
+    private static let defaultMenuScaleFactor: CGFloat = 0.85
+    private static let defaultAnimationDuration: TimeInterval = 0.4
+    private static let defaultSpringDamping: CGFloat = 0.8
+    private static let defaultInitialSpringVelocity: CGFloat = 0
+    private static let defaultCornerRadius: CGFloat = 40
 
-    public struct Animation {
-        public let duration: TimeInterval
-        public let dampingRatio: CGFloat
-        public let contentScaleFactor: CGFloat
+        // MARK: - Public Properties
+    public let menuWidth: CGFloat
+    public let menuYOffset: CGFloat
+    public let menuScaleFactor: CGFloat
+    public let animationDuration: TimeInterval
+    public let springDamping: CGFloat
+    public let initialSpringVelocity: CGFloat
+    public let backgroundColor: UIColor?
+    public let blurStyle: UIBlurEffect.Style?
+    public let cornerRadius: CGFloat
+    public let cellConfiguration: CellConfiguration
 
-        public init(
-            duration: TimeInterval = 0.4,
-            dampingRatio: CGFloat = 0.8,
-            contentScaleFactor: CGFloat = 0.9
-        ) {
-            self.duration = duration
-            self.dampingRatio = dampingRatio
-            self.contentScaleFactor = contentScaleFactor
-        }
-    }
-
-    public let items: [any SideMenuItem]
-    public let appearance: Appearance
-    public let animation: Animation
-    public let cellType: SideMenuCellProtocol.Type?
-
-    @MainActor
     public init(
-        items: [any SideMenuItem],
-        appearance: Appearance = Appearance(),
-        animation: Animation = Animation(),
-        cellType: SideMenuCellProtocol.Type? = nil
+        menuWidth: CGFloat? = nil,
+        menuYOffset: CGFloat? = nil,
+        menuScaleFactor: CGFloat? = nil,
+        animationDuration: TimeInterval? = nil,
+        springDamping: CGFloat? = nil,
+        initialSpringVelocity: CGFloat? = nil,
+        backgroundColor: UIColor? = nil,
+        blurStyle: UIBlurEffect.Style? = .regular,
+        cornerRadius: CGFloat? = nil,
+        cellType: SideMenuCellProtocol.Type = DefaultSideMenuCell.self
     ) {
-        self.items = items
-        self.appearance = appearance
-        self.animation = animation
-        self.cellType = cellType
+        self.menuWidth = menuWidth ?? Self.defaultMenuWidth
+        self.menuYOffset = menuYOffset ?? Self.defaultMenuYOffset
+        self.menuScaleFactor = menuScaleFactor ?? Self.defaultMenuScaleFactor
+        self.animationDuration = animationDuration ?? Self.defaultAnimationDuration
+        self.springDamping = springDamping ?? Self.defaultSpringDamping
+        self.initialSpringVelocity = initialSpringVelocity ?? Self.defaultInitialSpringVelocity
+        self.backgroundColor = backgroundColor
+        self.blurStyle = blurStyle
+        self.cornerRadius = cornerRadius ?? Self.defaultCornerRadius
+        self.cellConfiguration = CellConfiguration(cellType)
+    }
+}
+
+public struct CellConfiguration {
+    let cellClass: SideMenuCellProtocol.Type
+    let reuseIdentifier: String
+
+    public init<T: SideMenuCellProtocol>(_ cellType: T.Type) {
+        self.cellClass = cellType
+        self.reuseIdentifier = cellType.reuseIdentifier
     }
 }
