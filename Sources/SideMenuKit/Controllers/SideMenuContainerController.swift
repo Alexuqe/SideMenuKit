@@ -52,7 +52,7 @@ open class SideMenuContainerViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
         sideMenuViewController.delegate = self
         
-        if ((customNavigationController?.viewControllers.isEmpty) != nil) {
+        if customNavigationController?.viewControllers.isEmpty ?? false {
             customNavigationController?.setViewControllers([mainViewController], animated: false)
         }
     }
@@ -104,7 +104,7 @@ open class SideMenuContainerViewController: UIViewController {
         ])
 
         NSLayoutConstraint.activate([
-            mainView.topAnchor.constraint(equalTo: view.topAnchor),
+            mainView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             mainView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             mainView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             mainView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
