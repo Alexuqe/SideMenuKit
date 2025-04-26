@@ -94,13 +94,13 @@ open class SideMenuContainerViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             sideMenuViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            sideMenuViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
+            sideMenuViewController.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             sideMenuViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             sideMenuViewController.view.widthAnchor.constraint(equalToConstant: configuration.menuWidth)
         ])
 
         NSLayoutConstraint.activate([
-            mainView.topAnchor.constraint(equalTo: view.topAnchor),
+            mainView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             mainView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             mainView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             mainView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
