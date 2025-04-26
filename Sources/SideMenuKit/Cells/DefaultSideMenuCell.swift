@@ -18,6 +18,7 @@ open class DefaultSideMenuCell: UITableViewCell, SideMenuCellProtocol {
         // MARK: - Initialization
     public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
         setupLayout()
     }
     
@@ -27,7 +28,8 @@ open class DefaultSideMenuCell: UITableViewCell, SideMenuCellProtocol {
     
         // MARK: - Setup
     private func setupLayout() {
-        backgroundColor = .clear
+        clipsToBounds = true
+
         contentView.addSubview(iconImageView)
         contentView.addSubview(titleLabel)
         
@@ -45,7 +47,27 @@ open class DefaultSideMenuCell: UITableViewCell, SideMenuCellProtocol {
     
         // MARK: - Configuration
     open func configure(with item: SideMenuItemProtocol) {
-        titleLabel.text = item.title
-        iconImageView.image = item.icon
+        backgroundColor = item.backgroundColor ?? .clear
+
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = item.selectedBackGroundColor?
+            .withAlphaComponent(0.4) ?? .white.withAlphaComponent(0.4)
+
+        selectedBackgroundView = backgroundView
+
+        var content = defaultContentConfiguration()
+        content.imageProperties.preferredSymbolConfiguration = .init(pointSize: item.iconSize ?? 20)
+        content.imageProperties.tintColor = item.iconColor ?? .white
+        content.image = item.icon
+
+        content.attributedText = NSAttributedString(
+            string: item.title,
+            attributes: item.attributedTitle ??
+            [.font: UIFont.systemFont(ofSize: 20, weight: .regular),
+             .foregroundColor: UIColor.white
+            ]
+        )
+
+        contentConfiguration = content
     }
 }

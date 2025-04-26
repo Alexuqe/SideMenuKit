@@ -63,7 +63,6 @@ open class SideMenuContainerViewController: UIViewController {
         view.addSubview(sideMenuViewController.view)
         sideMenuViewController.didMove(toParent: self)
 
-        // Setup main navigation
         let navigationController = UINavigationController(rootViewController: mainViewController)
         addChild(navigationController)
         view.addSubview(navigationController.view)
@@ -121,41 +120,35 @@ open class SideMenuContainerViewController: UIViewController {
     // MARK: - Navigation
     public func resetHome() {
         guard let mainVC = navigationVC?.viewControllers.first else { return }
-        
-        // Remove all child view controllers
+
         mainVC.children.forEach { child in
             child.willMove(toParent: nil)
             child.view.removeFromSuperview()
             child.removeFromParent()
         }
-        
-        // Add home controller back
+
         mainVC.addChild(homeViewController)
         mainVC.view.addSubview(homeViewController.view)
         homeViewController.view.frame = mainVC.view.bounds
         homeViewController.didMove(toParent: mainVC)
-        
-        // Reset title
+
         mainVC.title = homeViewController.title ?? "Home"
     }
 
     private func changeView(to newController: UIViewController) {
         guard let mainVC = navigationVC?.viewControllers.first else { return }
-        
-        // Remove existing child if any
+
         mainVC.children.forEach { child in
             child.willMove(toParent: nil)
             child.view.removeFromSuperview()
             child.removeFromParent()
         }
-        
-        // Add new controller as child
+
         mainVC.addChild(newController)
         mainVC.view.addSubview(newController.view)
         newController.view.frame = mainVC.view.bounds
         newController.didMove(toParent: mainVC)
-        
-        // Update navigation title
+
         mainVC.title = newController.title
     }
 }

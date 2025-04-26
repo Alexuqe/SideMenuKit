@@ -12,17 +12,23 @@ final class SideMenuAnimator: SideMenuAnimatorProtocol {
         let x = isOpen ? configuration.menuWidth : 0
         let y = isOpen ? configuration.menuYOffset : 0
 
+        let scaleTransform = CGAffineTransform(scaleX: scale, y: scale)
+        let translation = CGAffineTransform(translationX: x, y: y)
+        let combined = translation.concatenating(scaleTransform)
+
+        view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
+
         UIView.animate(
             withDuration: configuration.animationDuration,
             delay: 0,
             usingSpringWithDamping: configuration.springDamping,
             initialSpringVelocity: configuration.initialSpringVelocity
         ) {
-            let transform = CGAffineTransform.identity
-                .translatedBy(x: x, y: y)
-                .scaledBy(x: scale, y: scale)
-
-            view.transform = transform
+//            let transform = CGAffineTransform.identity
+//                .translatedBy(x: x, y: y)
+//                .scaledBy(x: scale, y: scale)
+            
+            view.transform = combined
             view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
             blurView?.alpha = isOpen ? 0.9 : 0
             view.layoutIfNeeded()
