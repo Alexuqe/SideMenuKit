@@ -35,7 +35,7 @@ open class SideMenuContainerViewController: UIViewController {
             configuration: configuration,
             cellType: cellType
         )
-        self.mainViewController = items.first?.viewController ?? UIViewController()
+        self.mainViewController = items.first(where: { $0.viewController != nil })?.viewController ?? UIViewController()
         self.animator = SideMenuAnimator()
 
         super.init(nibName: nil, bundle: nil)
@@ -116,6 +116,20 @@ open class SideMenuContainerViewController: UIViewController {
     }
 
     // MARK: - Navigation
+    public func resetHome() {
+        guard let mainVC = navigationVC?.viewControllers.first else { return }
+        
+        // Remove all child view controllers
+        mainVC.children.forEach { child in
+            child.willMove(toParent: nil)
+            child.view.removeFromSuperview()
+            child.removeFromParent()
+        }
+        
+        // Reset title to Home
+        mainVC.title = "Home"
+    }
+
     private func changeView(to newController: UIViewController) {
         guard let mainVC = navigationVC?.viewControllers.first else { return }
         
@@ -140,7 +154,11 @@ open class SideMenuContainerViewController: UIViewController {
 // MARK: - SideMenuDelegate
 extension SideMenuContainerViewController: SideMenuDelegate {
     public func sideMenu(_ sideMenu: SideMenuViewController, didSelectItem item: SideMenuItemProtocol) {
-        changeView(to: item.viewController)
+        if let viewController = item.viewController {
+            changeView(to: viewController)
+        } else {
+            resetHome()
+        }
         toggleMenu()
     }
 }

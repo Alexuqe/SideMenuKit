@@ -3,7 +3,7 @@ import UIKit
 public protocol SideMenuItemProtocol {
     var title: String { get }
     var icon: UIImage? { get }
-    var viewController: UIViewController { get }
+    var viewController: UIViewController? { get }
 }
 
 public protocol SideMenuCellProtocol: UITableViewCell {
