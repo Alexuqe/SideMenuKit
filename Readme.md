@@ -1,197 +1,321 @@
 # SideMenuKit
 
-**SideMenuKit** – это легковесная Swift Package-библиотека для быстрого создания настраиваемого бокового меню в iOS-приложениях. С SideMenuKit вы можете:
+A lightweight and highly customizable side menu implementation for iOS 15+. SideMenuKit provides an elegant solution for implementing side menu navigation with smooth animations and extensive customization options.
 
-- Быстро интегрировать меню в ваш проект.
-- Настраивать ширину меню.
-- Использовать как стандартные, так и кастомные ячейки для отображения пунктов меню.
-- Централизованно управлять навигацией между экранами с помощью роутера.
+## Features
 
-## Особенности
+- **Smooth Animations**: Spring-based animations with customizable parameters
+- **Blur Effect Support**: Optional background blur effect with customizable style
+- **Flexible Configuration**: Extensive customization options for menu appearance and behavior
+- **Custom Cell Support**: Use default cells or implement your own
+- **Safe Area Aware**: Properly handles safe areas and device orientations
+- **iOS 15+ Support**: Built for modern iOS applications
 
-- **Динамическая настройка ширины меню:** задавайте нужную ширину при инициализации.
-- **Кастомизация ячеек:** используйте стандартные `UITableViewCell` или свой тип ячейки (через параметр `cellType`).
-- **Анимированное появление/скрытие меню:** плавные анимации, выполняемые на главном акторе, чтобы обеспечить безопасное обновление UI.
-- **Централизованная навигация:** переключение между экранами посредством `SideMenuRouter`, который принимает массив `UIViewController`.
-- **Требования:** iOS 13.0+, Swift 6.0+, Xcode 14+.
+## Requirements
 
-## Установка
+- iOS 15.0+
+- Swift 5.9+
+- Xcode 15.0+
 
-### Swift Package Manager (SPM)
+## Installation
 
-1. Откройте ваш проект в Xcode.
-2. Выберите **File > Add Packages…**
-3. Введите URL репозитория вашего SideMenuKit, например:
-"https://github.com/your_username/SideMenuKit.git"
-4. Выберите нужную версию и нажмите **Add Package**.
-5. В нужных файлах импортируйте модуль:
+### Swift Package Manager
+
+Add the following dependency to your `Package.swift` file:
 
 ```swift
-import SideMenuKit
-```
-
-## Структура проекта
-```swift
-SideMenuKit/
-├── Package.swift                # Конфигурация Swift Package
-└── Sources/
-    └── SideMenuKit/
-        ├── SideMenuItem.swift   # Модель данных для пункта меню
-        ├── SideMenuViewController.swift   # UI-компонент бокового меню
-        ├── SideMenuManager.swift  # Менеджер для отображения/скрытия меню
-        └── SideMenuRouter.swift   # Централизованная навигация между экранами
-```
-
-## Использование
-
-### 1. SideMenuItem
-Используйте SideMenuItem для описания пункта меню. Пример:
-```swift
-let item = SideMenuItem(title: "Главная", image: UIImage(named: "home_icon"))
-```
-
-### 2. SideMenuViewController
-Создайте экземпляр бокового меню, передав ширину, тип ячейки (опционально) и массив данных:
-```swift
-let menuItems: [SideMenuItem] = [
-    SideMenuItem(title: "Главная", image: UIImage(named: "home_icon")),
-    SideMenuItem(title: "Профиль", image: UIImage(named: "profile_icon")),
-    SideMenuItem(title: "Настройки", image: UIImage(named: "settings_icon")),
-    SideMenuItem(title: "Выход", image: UIImage(named: "logout_icon"))
+dependencies: [
+    .package(url: "https://github.com/yourusername/SideMenuKit.git", from: "1.0.0")
 ]
-
-// Использование стандартной ячейки (UITableViewCell)
-let sideMenuVC = SideMenuViewController(menuWidth: 300, cellType: UITableViewCell.self, menuItems: menuItems)
 ```
 
-### 3. SideMenuManager
-Класс SideMenuManager отвечает за анимированное появление и скрытие меню:
+Or add it through Xcode:
+1. Go to File > Add Packages
+2. Enter the package URL
+3. Click "Add Package"
+
+## Usage
+
+### Basic Implementation
+
+1. Create menu items:
+
 ```swift
- let menuManager = SideMenuManager(
-            container: self,
-            navigationVC: navigationVC,
-            blurEffectView: blurEffectView,
-            menuWidth: 300,
-            menuItems: menuItems
-        )
+let menuItems: [SideMenuItemProtocol] = [
+    MenuItem(title: "Home", icon: UIImage(systemName: "house"), viewController: HomeViewController()),
+    MenuItem(title: "Profile", icon: UIImage(systemName: "person"), viewController: ProfileViewController()),
+    MenuItem(title: "Settings", icon: UIImage(systemName: "gear"), viewController: SettingsViewController())
+]
+```
+
+2. Configure and initialize the side menu:
+
+```swift
+let config = SideMenuConfiguration(
+    menuWidth: 300,
+    menuYOffset: 100,
+    menuScaleFactor: 0.8,
+    backgroundColor: .systemBackground,
+    blurStyle: .regular
+)
+
+let sideMenuController = SideMenuContainerViewController(
+    items: menuItems,
+    configuration: config,
+    homeViewController: HomeViewController()
+)
+```
+
+### Animation Customization
+
+You can fine-tune the menu animation by adjusting the configuration parameters:
+
+```swift
+// Create configuration with custom animation parameters
+let config = SideMenuConfiguration(
+    menuWidth: UIScreen.main.bounds.width * 0.8,    // 80% of screen width
+    menuYOffset: 120,                               // Larger vertical offset
+    menuScaleFactor: 0.7,                          // More pronounced scaling effect
+    animationDuration: 0.6,                         // Slower animation
+    springDamping: 0.65,                           // More bouncy animation
+    initialSpringVelocity: 0.5,                    // Initial velocity for spring
+    backgroundColor: .systemIndigo,                 // Custom background color
+    blurStyle: .prominent,                         // More prominent blur
+    cornerRadius: 30                               // Rounded corners
+)
+
+// Initialize menu with custom animation configuration
+let sideMenuController = SideMenuContainerViewController(
+    items: menuItems,
+    configuration: config,
+    homeViewController: HomeViewController()
+)
+```
+
+### Detailed Custom Cell Implementation
+
+Here's a complete example of a custom cell with icon, title, and selection state handling:
+
+```swift
+class CustomMenuCell: UITableViewCell, SideMenuCellProtocol {
+    // MARK: - UI Components
+    private let containerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.layer.cornerRadius = 12
+        return view
+    }()
+    
+    private let iconImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.numberOfLines = 1
+        return label
+    }()
+    
+    // MARK: - Initialization
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupLayout()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Setup
+    private func setupLayout() {
+        backgroundColor = .clear
+        selectionStyle = .none
         
-menuManager.showMenu()
+        contentView.addSubview(containerView)
+        containerView.addSubview(iconImageView)
+        containerView.addSubview(titleLabel)
+        
+        NSLayoutConstraint.activate([
+            // Container constraints
+            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            containerView.heightAnchor.constraint(equalToConstant: 44),
+            
+            // Icon constraints
+            iconImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            iconImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: 24),
+            
+            // Title constraints
+            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            titleLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
+        ])
+    }
+    
+    // MARK: - SideMenuCellProtocol Implementation
+    func configure(with item: SideMenuItemProtocol) {
+        // Configure icon
+        iconImageView.image = item.icon
+        iconImageView.tintColor = item.iconColor ?? .white
+        if let iconSize = item.iconSize {
+            iconImageView.widthAnchor.constraint(equalToConstant: iconSize).isActive = true
+            iconImageView.heightAnchor.constraint(equalToConstant: iconSize).isActive = true
+        }
+        
+        // Configure title
+        if let attributedTitle = item.attributedTitle {
+            titleLabel.attributedText = NSAttributedString(string: item.title, attributes: attributedTitle)
+        } else {
+            titleLabel.text = item.title
+            titleLabel.font = item.titleFont ?? .systemFont(ofSize: 16, weight: .medium)
+            titleLabel.textColor = .white
+        }
+        
+        // Configure colors and appearance
+        containerView.backgroundColor = item.cellBackgroundColor ?? .clear
+        containerView.layer.cornerRadius = item.cellCornerRadius ?? 12
+        
+        // Configure selection state
+        let selectedBgView = UIView()
+        selectedBgView.backgroundColor = item.selectedBackGroundColor ?? .white.withAlphaComponent(0.2)
+        selectedBackgroundView = selectedBgView
+    }
+    
+    // MARK: - Selection State
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+        UIView.animate(withDuration: 0.2) {
+            self.containerView.transform = selected ? CGAffineTransform(scaleX: 0.95, y: 0.95) : .identity
+        }
+    }
+}
 
-Чтобы скрыть меню, вызовите:
-menuManager.hideMenu()
+// Usage example:
+let config = SideMenuConfiguration()
+let sideMenuController = SideMenuContainerViewController(
+    items: menuItems,
+    configuration: config,
+    cellType: CustomMenuCell.self,    // Use our custom cell
+    homeViewController: HomeViewController()
+)
 ```
 
-### 4. SideMenuRouter
-SideMenuRouter обеспечивает централизованную навигацию между экранами. Передайте ему массив контроллеров для переключения:
+This custom cell implementation includes:
+- Custom layout with container view
+- Icon and title with customizable properties
+- Selection state animation
+- Support for all SideMenuItemProtocol properties
+- Proper Auto Layout constraints
+- Clean separation of concerns
+
+## Configuration Options
+
+### SideMenuConfiguration
+
 ```swift
-let viewControllers: [UIViewController] = [
-    HomeViewController(),
-    ProfileViewController(),
-    SettingsViewController(),
-    LogoutViewController()
-]
-
-let router = SideMenuRouter(container: self, controllers: viewControllers)
-router.navigate(to: 0)  // Переход на экран по индексу 0 (например, HomeViewController)
+SideMenuConfiguration(
+    menuWidth: CGFloat,              // Width of the side menu
+    menuYOffset: CGFloat,            // Vertical offset when menu is open
+    menuScaleFactor: CGFloat,        // Scale factor for main view when menu is open
+    animationDuration: TimeInterval, // Duration of open/close animation
+    springDamping: CGFloat,         // Spring animation damping
+    backgroundColor: UIColor?,      // Background color of the menu
+    blurStyle: UIBlurEffect.Style?, // Optional blur effect style
+    cornerRadius: CGFloat           // Corner radius when menu is open
+)
 ```
 
-## Пример интеграции
-Ниже приведён пример контейнерного контроллера, демонстрирующего, как использовать SideMenuKit для интеграции бокового меню и навигации между экранами:
+### Menu Item Properties
+
+The `SideMenuItemProtocol` provides the following customizable properties:
+
+- `title`: String
+- `icon`: UIImage?
+- `iconColor`: UIColor?
+- `iconSize`: CGFloat?
+- `titleFont`: UIFont?
+- `attributedTitle`: [NSAttributedString.Key: Any]?
+- `selectedBackGroundColor`: UIColor?
+- `cellBackgroundColor`: UIColor?
+- `cellCornerRadius`: CGFloat?
+- `backgroundColor`: UIColor?
+- `viewController`: UIViewController?
+
+## Delegate Methods
+
+Implement `SideMenuDelegate` to handle menu item selection:
+
+```swift
+public protocol SideMenuDelegate: AnyObject {
+    func sideMenu(_ sideMenu: SideMenuViewController, didSelectItem item: SideMenuItemProtocol)
+}
+```
+
+## Example Project
+
+Here's a complete example of implementing SideMenuKit:
+
 ```swift
 import UIKit
 import SideMenuKit
 
-/// Контейнерный контроллер, в котором интегрируется боковое меню и осуществляется навигация между экранами.
-final class ContainerViewController: UIViewController {
-
-    // Массив данных меню.
-    private let menuItems: [SideMenuItem] = [
-        SideMenuItem(title: "Главная", image: UIImage(named: "home_icon")),
-        SideMenuItem(title: "Профиль", image: UIImage(named: "profile_icon")),
-        SideMenuItem(title: "Настройки", image: UIImage(named: "settings_icon")),
-        SideMenuItem(title: "Выход", image: UIImage(named: "logout_icon"))
-    ]
-    
-    // Массив контроллеров для навигации.
-    private var viewControllers: [UIViewController] = [
-        HomeViewController(),
-        InfoViewController(),
-        RatingViewController()
-    ]
-    
-    // Менеджер бокового меню с расширенной анимацией.
-    private var menuManager: SideMenuManager!
-    
-    // Роутер для переключения между экранами.
-    private var menuRouter: SideMenuRouterProtocol!
-    
-    // Свойства, необходимые для расширенной анимации.
-    // Предполагается, что контейнер обернут в UINavigationController.
-    private var navigationVC: UINavigationController? {
-        return self.navigationController
-    }
-    
-    // Blur Effect View для эффекта размытия фона.
-    private lazy var blurEffectView: UIVisualEffectView = {
-        let blurEffect = UIBlurEffect(style: .light)
-        let view = UIVisualEffectView(effect: blurEffect)
-        view.frame = self.view.bounds
-        view.alpha = 0.0
-        return view
-    }()
-    
+class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .gray
         
-        // Добавляем blurEffectView в иерархию и отправляем его назад.
-        view.addSubview(blurEffectView)
-        view.sendSubviewToBack(blurEffectView)
+        // Create menu items
+        let menuItems: [SideMenuItemProtocol] = [
+            MenuItem(
+                title: "Home",
+                icon: UIImage(systemName: "house"),
+                viewController: HomeViewController()
+            ),
+            MenuItem(
+                title: "Profile",
+                icon: UIImage(systemName: "person"),
+                viewController: ProfileViewController()
+            )
+        ]
         
-        // Инициализируем менеджер бокового меню с расширенной анимацией.
-        menuManager = SideMenuManager(
-            container: self,
-            navigationVC: navigationVC,
-            blurEffectView: blurEffectView,
-            menuWidth: 300,
-            menuItems: menuItems
+        // Configure the menu
+        let config = SideMenuConfiguration(
+            menuWidth: UIScreen.main.bounds.width * 0.7,
+            menuYOffset: 100,
+            menuScaleFactor: 0.8,
+            backgroundColor: .systemBackground,
+            blurStyle: .regular
         )
         
-        // Инициализируем роутер, который осуществляет навигацию между контроллерами.
-        menuRouter = SideMenuRouter(container: self, controllers: viewControllers)
-        
-        // Настраиваем кнопку вызова меню в navigation bar.
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "list.dash"),
-            style: .done,
-            target: self,
-            action: #selector(didTapMenuButton)
+        // Create the side menu controller
+        let sideMenuController = SideMenuContainerViewController(
+            items: menuItems,
+            configuration: config,
+            homeViewController: HomeViewController()
         )
-    }
-    
-    /// Вызывает показ бокового меню с обновленной анимацией.
-    @objc private func didTapMenuButton() {
-        menuManager.showMenu()
-    }
-}
-
-extension ContainerViewController: SideMenuDelegate {
-    /// Реализация делегата меню: при выборе пункта скрываем меню и переключаем экран.
-    func didSelect(index: Int) {
-        menuManager.hideMenu()
-        menuRouter.navigate(to: index)
+        
+        // Present the side menu controller
+        addChild(sideMenuController)
+        view.addSubview(sideMenuController.view)
+        sideMenuController.didMove(toParent: self)
     }
 }
 ```
 
-## Кастомизация
-- Ширина меню: Передавайте нужное значение menuWidth в инициализатор SideMenuManager или SideMenuViewController.
+## Best Practices
 
-- Кастомные ячейки: Если хотите использовать свой компонент ячейки, передайте его тип через параметр cellType при создании бокового меню. Убедитесь, что
-ваша ячейка корректно конфигурируется (например, реализуйте метод configure(with:)).
+1. **Memory Management**: The library uses weak references where appropriate to prevent retain cycles.
+2. **Safe Area Handling**: The menu respects safe areas for proper layout on all devices.
+3. **Animation Performance**: Animations are optimized for smooth performance.
+4. **State Management**: The menu properly handles state changes and view controller lifecycle.
 
-- Данные меню: Заполните массив SideMenuItem нужными заголовками и изображениями.
+## License
 
-
-## Лицензия
-Этот проект распространяется под лицензией MIT License.
+SideMenuKit is available under the MIT license. See the LICENSE file for more info.
