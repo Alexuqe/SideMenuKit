@@ -55,6 +55,8 @@ open class DefaultSideMenuCell: UITableViewCell, SideMenuCellProtocol {
 
         selectedBackgroundView = backgroundView
 
+        layer.cornerRadius = item.cellCornerRadius ?? 20
+
         var content = defaultContentConfiguration()
         content.imageProperties.preferredSymbolConfiguration = .init(pointSize: item.iconSize ?? 20)
         content.imageProperties.tintColor = item.iconColor ?? .white
