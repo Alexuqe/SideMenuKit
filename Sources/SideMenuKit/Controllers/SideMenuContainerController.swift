@@ -5,10 +5,11 @@ open class SideMenuContainerViewController: UIViewController {
     private let sideMenuViewController: SideMenuViewController
     private let animator: SideMenuAnimatorProtocol
     private var mainViewController: UIViewController
-    public let useNavigationControllerller: UINavigationController
+    private var customNavigationController: UINavigationController?
     private let configuration: SideMenuConfiguration
 
     private var isMenuOpen = false
+    private var useNavigationController: Bool
 
     private lazy var blurEffectView: UIVisualEffectView? = {
         guard let blurStyle = configuration.blurStyle else { return nil }
@@ -20,7 +21,7 @@ open class SideMenuContainerViewController: UIViewController {
     }()
 
     private var mainView: UIView {
-        return useNavigationControllerller.view
+        return customNavigationController?.view ?? mainViewController.view
     }
 
         // MARK: - Initialization
@@ -28,7 +29,7 @@ open class SideMenuContainerViewController: UIViewController {
         items: [SideMenuItemProtocol],
         configuration: SideMenuConfiguration = SideMenuConfiguration(),
         cellType: SideMenuCellProtocol.Type = DefaultSideMenuCell.self,
-        navigationController: UINavigationController
+        navigationController: UINavigationController? = nil
     ) {
         self.configuration = configuration
         self.sideMenuViewController = SideMenuViewController(
@@ -37,7 +38,15 @@ open class SideMenuContainerViewController: UIViewController {
             cellType: cellType
         )
         self.mainViewController = items.first?.viewController ?? UIViewController()
-        self.useNavigationControllerller = navigationController
+
+        if let existingNavController = navigationController {
+            self.customNavigationController = existingNavController
+            self.useNavigationController = true
+        } else {
+            self.customNavigationController = UINavigationController(rootViewController: self.mainViewController)
+            self.useNavigationController = true
+        }
+
         self.animator = SideMenuAnimator()
 
         super.init(nibName: nil, bundle: nil)
@@ -66,13 +75,18 @@ open class SideMenuContainerViewController: UIViewController {
         view.addSubview(sideMenuViewController.view)
         sideMenuViewController.didMove(toParent: self)
 
-        // Setup navigation controller
-        addChild(useNavigationControllerller)
-        view.addSubview(useNavigationControllerller.view)
-        useNavigationControllerller.didMove(toParent: self)
+        if let navController = customNavigationController {
+            if navController.viewControllers.isEmpty {
+                navController.setViewControllers([mainViewController], animated: false)
+            }
 
-        if let blurEffectView = blurEffectView {
-            useNavigationControllerller.view.addSubview(blurEffectView)
+            addChild(navController)
+            view.addSubview(navController.view)
+            navController.didMove(toParent: self)
+
+            if let blurEffectView = blurEffectView {
+                navController.view.addSubview(blurEffectView)
+            }
         }
 
         setupConstraints()
@@ -90,7 +104,7 @@ open class SideMenuContainerViewController: UIViewController {
         ])
 
         NSLayoutConstraint.activate([
-            mainView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            mainView.topAnchor.constraint(equalTo: view.topAnchor),
             mainView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             mainView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             mainView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
@@ -126,12 +140,19 @@ open class SideMenuContainerViewController: UIViewController {
             completion: nil
         )
     }
+
+    public func getNavigationController() -> UINavigationController {
+        return customNavigationController ?? UINavigationController()
+    }
 }
 
     // MARK: - SideMenuDelegate
 extension SideMenuContainerViewController: SideMenuDelegate {
     public func sideMenu(_ sideMenu: SideMenuViewController, didSelectItem item: SideMenuItemProtocol) {
-        useNavigationControllerller.setViewControllers([item.viewController], animated: false)
+        if let navController = customNavigationController {
+            navController.setViewControllers([item.viewController], animated: false)
+        }
+        
         toggleMenu()
     }
 }
