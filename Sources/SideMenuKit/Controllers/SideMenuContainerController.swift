@@ -100,7 +100,7 @@ open class SideMenuContainerViewController: UIViewController {
 
     private func setupGestures() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture))
-        view.addGestureRecognizer(tapGesture)
+        homeViewController.view.addGestureRecognizer(tapGesture)
     }
 
     // MARK: - Actions
