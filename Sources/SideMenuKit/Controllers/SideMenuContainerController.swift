@@ -52,8 +52,8 @@ open class SideMenuContainerViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
         sideMenuViewController.delegate = self
         
-        if navigationController.viewControllers.isEmpty {
-            navigationController.setViewControllers([mainViewController], animated: false)
+        if ((customNavigationController?.viewControllers.isEmpty) != nil) {
+            customNavigationController?.setViewControllers([mainViewController], animated: false)
         }
     }
 
