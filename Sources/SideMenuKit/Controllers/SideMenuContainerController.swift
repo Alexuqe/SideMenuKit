@@ -42,7 +42,7 @@ open class SideMenuContainerViewController: UIViewController {
         self.homeViewController = homeViewController
         self.mainViewController = homeViewController
         self.animator = SideMenuAnimator()
-
+       
         super.init(nibName: nil, bundle: nil)
         sideMenuViewController.delegate = self
     }
@@ -162,6 +162,7 @@ extension SideMenuContainerViewController: SideMenuDelegate {
     public func sideMenu(_ sideMenu: SideMenuViewController, didSelectItem item: SideMenuItemProtocol) {
         if let viewController = item.viewController {
             changeView(to: viewController)
+            viewController.title = item.title
         } else {
             resetHome()
         }
