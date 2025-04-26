@@ -26,6 +26,8 @@ final class SideMenuAnimator: SideMenuAnimatorProtocol {
             view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
             blurView?.alpha = isOpen ? 0.9 : 0
 
+            view.layoutIfNeeded()
+
             completion?()
         }
     }
