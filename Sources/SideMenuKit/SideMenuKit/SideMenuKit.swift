@@ -5,7 +5,7 @@ public final class SideMenuKit {
         items: [SideMenuItemProtocol],
         configuration: SideMenuConfiguration = .init(),
         cellType: SideMenuCellProtocol.Type = DefaultSideMenuCell.self,
-        navigationController: UINavigationController
+        navigationController: UINavigationController? = nil
     ) -> UIViewController {
         return SideMenuContainerViewController(
             items: items,
