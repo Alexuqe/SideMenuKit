@@ -100,7 +100,7 @@ open class SideMenuContainerViewController: UIViewController {
 
     private func setupGestures() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture))
-        blurEffectView?.addGestureRecognizer(tapGesture)
+        view.addGestureRecognizer(tapGesture)
     }
 
     // MARK: - Actions
