@@ -161,8 +161,8 @@ open class SideMenuContainerViewController: UIViewController {
 extension SideMenuContainerViewController: SideMenuDelegate {
     public func sideMenu(_ sideMenu: SideMenuViewController, didSelectItem item: SideMenuItemProtocol) {
         if let viewController = item.viewController {
+            viewController.title = item.title
             changeView(to: viewController)
-//            viewController.title = item.title
         } else {
             resetHome()
         }
