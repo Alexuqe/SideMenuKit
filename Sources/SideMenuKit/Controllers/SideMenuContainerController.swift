@@ -2,12 +2,13 @@ import UIKit
 
 open class SideMenuContainerViewController: UIViewController {
     // MARK: - Properties
+    private weak var navigationVC: UINavigationController?
+    private var mainViewController: UIViewController
+    private let homeViewController: UIViewController
     private let sideMenuViewController: SideMenuViewController
     private let animator: SideMenuAnimatorProtocol
-    private var mainViewController: UIViewController
-    private weak var navigationVC: UINavigationController?
+    private var viewTitle: SideMenuItemProtocol?
     private let configuration: SideMenuConfiguration
-    private let homeViewController: UIViewController // Store initial home controller
 
     private var isMenuOpen = false
 
@@ -37,6 +38,7 @@ open class SideMenuContainerViewController: UIViewController {
             configuration: configuration,
             cellType: cellType
         )
+
         self.homeViewController = homeViewController
         self.mainViewController = homeViewController
         self.animator = SideMenuAnimator()
@@ -132,7 +134,8 @@ open class SideMenuContainerViewController: UIViewController {
         homeViewController.view.frame = mainVC.view.bounds
         homeViewController.didMove(toParent: mainVC)
 
-        mainVC.title = homeViewController.title ?? "Home"
+        let title = viewTitle?.title
+        mainVC.title = homeViewController.title ?? title
     }
 
     private func changeView(to newController: UIViewController) {
@@ -149,7 +152,8 @@ open class SideMenuContainerViewController: UIViewController {
         newController.view.frame = mainVC.view.bounds
         newController.didMove(toParent: mainVC)
 
-        mainVC.title = newController.title
+        let title = viewTitle?.title
+        mainVC.title = newController.title ?? title
     }
 }
 
