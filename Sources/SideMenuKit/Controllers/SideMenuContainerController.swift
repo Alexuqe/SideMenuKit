@@ -5,7 +5,7 @@ open class SideMenuContainerViewController: UIViewController {
     private let sideMenuViewController: SideMenuViewController
     private let animator: SideMenuAnimatorProtocol
     private var mainViewController: UIViewController
-    public let useNavigationControllerller: UINavigationController
+    public let useNavigationController: UINavigationController
     private let configuration: SideMenuConfiguration
 
     private var isMenuOpen = false
@@ -20,7 +20,7 @@ open class SideMenuContainerViewController: UIViewController {
     }()
 
     private var mainView: UIView {
-        return useNavigationControllerller.view
+        return useNavigationController.view
     }
 
         // MARK: - Initialization
@@ -37,7 +37,7 @@ open class SideMenuContainerViewController: UIViewController {
             cellType: cellType
         )
         self.mainViewController = items.first?.viewController ?? UIViewController()
-        self.useNavigationControllerller = navigationController
+        self.useNavigationController = navigationController
         self.animator = SideMenuAnimator()
 
         super.init(nibName: nil, bundle: nil)
@@ -66,13 +66,10 @@ open class SideMenuContainerViewController: UIViewController {
         view.addSubview(sideMenuViewController.view)
         sideMenuViewController.didMove(toParent: self)
 
-        // Setup navigation controller
-        addChild(useNavigationControllerller)
-        view.addSubview(useNavigationControllerller.view)
-        useNavigationControllerller.didMove(toParent: self)
-
+        // Add blur effect view if needed
         if let blurEffectView = blurEffectView {
-            useNavigationControllerller.view.addSubview(blurEffectView)
+            view.addSubview(blurEffectView)
+            view.bringSubviewToFront(blurEffectView)
         }
 
         setupConstraints()
@@ -80,7 +77,6 @@ open class SideMenuContainerViewController: UIViewController {
 
     private func setupConstraints() {
         sideMenuViewController.view.translatesAutoresizingMaskIntoConstraints = false
-        mainView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
             sideMenuViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -89,19 +85,13 @@ open class SideMenuContainerViewController: UIViewController {
             sideMenuViewController.view.widthAnchor.constraint(equalToConstant: configuration.menuWidth)
         ])
 
-        NSLayoutConstraint.activate([
-            mainView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            mainView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            mainView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            mainView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
-
         if let blurView = blurEffectView {
+            blurView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
-                blurView.topAnchor.constraint(equalTo: mainView.topAnchor),
-                blurView.bottomAnchor.constraint(equalTo: mainView.bottomAnchor),
-                blurView.leadingAnchor.constraint(equalTo: mainView.leadingAnchor),
-                blurView.trailingAnchor.constraint(equalTo: mainView.trailingAnchor)
+                blurView.topAnchor.constraint(equalTo: view.topAnchor),
+                blurView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                blurView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
         }
     }
@@ -119,7 +109,7 @@ open class SideMenuContainerViewController: UIViewController {
     public func toggleMenu() {
         isMenuOpen.toggle()
         animator.animate(
-            view: mainView,
+            view: useNavigationController.view,
             isOpen: isMenuOpen,
             configuration: configuration,
             blurView: blurEffectView,
@@ -131,7 +121,7 @@ open class SideMenuContainerViewController: UIViewController {
     // MARK: - SideMenuDelegate
 extension SideMenuContainerViewController: SideMenuDelegate {
     public func sideMenu(_ sideMenu: SideMenuViewController, didSelectItem item: SideMenuItemProtocol) {
-        useNavigationControllerller.setViewControllers([item.viewController], animated: false)
+        useNavigationController.setViewControllers([item.viewController], animated: false)
         toggleMenu()
     }
 }
