@@ -164,9 +164,11 @@ open class SideMenuContainerViewController: UIViewController {
 extension SideMenuContainerViewController: SideMenuDelegate {
     public func sideMenu(_ sideMenu: SideMenuViewController, didSelectItem item: SideMenuItemProtocol) {
         if let viewController = item.viewController {
-            changeView(to: viewController)
-        } else {
-            resetHome()
+            if type(of: viewController) == type(of: homeViewController) {
+                resetHome()
+            } else {
+                changeView(to: viewController)
+            }
         }
         toggleMenu()
     }
