@@ -7,6 +7,7 @@ open class SideMenuContainerViewController: UIViewController {
     private var mainViewController: UIViewController
     private weak var navigationVC: UINavigationController?
     private let configuration: SideMenuConfiguration
+    private let homeViewController: UIViewController // Store initial home controller
 
     private var isMenuOpen = false
 
@@ -27,7 +28,8 @@ open class SideMenuContainerViewController: UIViewController {
     public init(
         items: [SideMenuItemProtocol],
         configuration: SideMenuConfiguration = SideMenuConfiguration(),
-        cellType: SideMenuCellProtocol.Type = DefaultSideMenuCell.self
+        cellType: SideMenuCellProtocol.Type = DefaultSideMenuCell.self,
+        homeViewController: UIViewController
     ) {
         self.configuration = configuration
         self.sideMenuViewController = SideMenuViewController(
@@ -35,7 +37,8 @@ open class SideMenuContainerViewController: UIViewController {
             configuration: configuration,
             cellType: cellType
         )
-        self.mainViewController = items.first(where: { $0.viewController != nil })?.viewController ?? UIViewController()
+        self.homeViewController = homeViewController
+        self.mainViewController = homeViewController
         self.animator = SideMenuAnimator()
 
         super.init(nibName: nil, bundle: nil)
@@ -126,8 +129,14 @@ open class SideMenuContainerViewController: UIViewController {
             child.removeFromParent()
         }
         
-        // Reset title to Home
-        mainVC.title = "Home"
+        // Add home controller back
+        mainVC.addChild(homeViewController)
+        mainVC.view.addSubview(homeViewController.view)
+        homeViewController.view.frame = mainVC.view.bounds
+        homeViewController.didMove(toParent: mainVC)
+        
+        // Reset title
+        mainVC.title = homeViewController.title ?? "Home"
     }
 
     private func changeView(to newController: UIViewController) {
