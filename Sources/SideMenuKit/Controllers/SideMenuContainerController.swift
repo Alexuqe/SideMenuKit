@@ -1,7 +1,7 @@
 import UIKit
 
 open class SideMenuContainerViewController: UIViewController {
-    // MARK: - Properties
+        // MARK: - Properties
     private let sideMenuViewController: SideMenuViewController
     private let animator: SideMenuAnimatorProtocol
     private var mainViewController: UIViewController
@@ -24,7 +24,7 @@ open class SideMenuContainerViewController: UIViewController {
         return customNavigationController?.view ?? mainViewController.view
     }
 
-    // MARK: - Initialization
+        // MARK: - Initialization
     public init(
         items: [SideMenuItemProtocol],
         configuration: SideMenuConfiguration = SideMenuConfiguration(),
@@ -38,8 +38,15 @@ open class SideMenuContainerViewController: UIViewController {
             cellType: cellType
         )
         self.mainViewController = items.first?.viewController ?? UIViewController()
-        self.customNavigationController = navigationController
-        self.useNavigationController = navigationController != nil
+
+        if let existingNavController = navigationController {
+            self.customNavigationController = existingNavController
+            self.useNavigationController = true
+        } else {
+            self.customNavigationController = UINavigationController(rootViewController: self.mainViewController)
+            self.useNavigationController = true
+        }
+
         self.animator = SideMenuAnimator()
 
         super.init(nibName: nil, bundle: nil)
@@ -50,36 +57,32 @@ open class SideMenuContainerViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Lifecycle
+        // MARK: - Lifecycle
     open override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
         setupGestures()
     }
 
-    // MARK: - Setup
+        // MARK: - Setup
     private func setupLayout() {
-        // Setup side menu
+            // Setup side menu
         addChild(sideMenuViewController)
         view.addSubview(sideMenuViewController.view)
         sideMenuViewController.didMove(toParent: self)
 
-        // Setup main content
-        if let navigationController = customNavigationController {
-            if navigationController.viewControllers.isEmpty {
-                navigationController.setViewControllers([mainViewController], animated: false)
+        if let navController = customNavigationController {
+            if navController.viewControllers.isEmpty {
+                navController.setViewControllers([mainViewController], animated: false)
             }
-            addChild(navigationController)
-            view.addSubview(navigationController.view)
-            navigationController.didMove(toParent: self)
-        } else {
-            addChild(mainViewController)
-            view.addSubview(mainViewController.view)
-            mainViewController.didMove(toParent: self)
-        }
 
-        if let blurEffectView = blurEffectView {
-            mainView.addSubview(blurEffectView)
+            addChild(navController)
+            view.addSubview(navController.view)
+            navController.didMove(toParent: self)
+
+            if let blurEffectView = blurEffectView {
+                navController.view.addSubview(blurEffectView)
+            }
         }
 
         setupConstraints()
@@ -118,7 +121,7 @@ open class SideMenuContainerViewController: UIViewController {
         blurEffectView?.addGestureRecognizer(tapGesture)
     }
 
-    // MARK: - Actions
+        // MARK: - Actions
     @objc private func handleTapGesture() {
         toggleMenu()
     }
@@ -133,25 +136,19 @@ open class SideMenuContainerViewController: UIViewController {
             completion: nil
         )
     }
+
+    public func getNavigationController() -> UINavigationController {
+        return customNavigationController ?? UINavigationController()
+    }
 }
 
-// MARK: - SideMenuDelegate
+    // MARK: - SideMenuDelegate
 extension SideMenuContainerViewController: SideMenuDelegate {
     public func sideMenu(_ sideMenu: SideMenuViewController, didSelectItem item: SideMenuItemProtocol) {
-        if useNavigationController {
-            customNavigationController?.setViewControllers([item.viewController], animated: false)
-        } else {
-            mainViewController.willMove(toParent: nil)
-            mainViewController.view.removeFromSuperview()
-            mainViewController.removeFromParent()
-
-            mainViewController = item.viewController
-            addChild(mainViewController)
-            view.addSubview(mainViewController.view)
-            mainViewController.didMove(toParent: self)
-
-            setupConstraints()
+        if let navController = customNavigationController {
+            navController.setViewControllers([item.viewController], animated: false)
         }
+        
         toggleMenu()
     }
 }
