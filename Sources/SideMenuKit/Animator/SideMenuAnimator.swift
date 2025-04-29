@@ -81,7 +81,7 @@ final class SideMenuAnimator: SideMenuAnimatorProtocol {
             completion?()
         } completion: { done in
             if done {
-                view.layer.cornerRadius = 0
+                view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
             }
         }
     }
