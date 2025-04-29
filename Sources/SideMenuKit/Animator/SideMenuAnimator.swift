@@ -58,7 +58,7 @@ final class SideMenuAnimator: SideMenuAnimatorProtocol {
         let combined = translation.concatenating(scaleTransform)
 
         // Set initial corner radius
-        view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
+        view.layer.cornerRadius = configuration.cornerRadius
 
         // Perform the animation
         UIView.animate(
