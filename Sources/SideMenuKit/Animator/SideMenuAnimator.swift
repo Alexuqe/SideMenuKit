@@ -58,7 +58,7 @@ final class SideMenuAnimator: SideMenuAnimatorProtocol {
         let combined = translation.concatenating(scaleTransform)
 
         // Set initial corner radius
-        view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
+        view.layer.cornerRadius = configuration.cornerRadius
 
         // Perform the animation
         UIView.animate(
@@ -69,7 +69,7 @@ final class SideMenuAnimator: SideMenuAnimatorProtocol {
         ) {
             // Apply transforms
             view.transform = combined
-            view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
+            view.layer.cornerRadius = configuration.cornerRadius
             
             // Animate blur effect if present
             blurView?.alpha = isOpen ? 0.9 : 0
@@ -79,6 +79,10 @@ final class SideMenuAnimator: SideMenuAnimatorProtocol {
             
             // Call completion handler if provided
             completion?()
+        } completion: { done in
+            if done {
+                view.layer.cornerRadius = isOpen ? configuration.cornerRadius : 0
+            }
         }
     }
 }
